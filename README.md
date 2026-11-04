@@ -3,6 +3,7 @@
 Website interativo para salão de cabeleireiro/barbearia, com apresentação de serviços, equipe profissional e experiência de navegação dinâmica. Frontend completo; backend em andamento.
 
 🔗 **Repositório:** https://github.com/Dev-Ademir/lumina
+🔗 **[Link de acesso:](https://dev-ademir.github.io/lumina/)**
 
 ---
 

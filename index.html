@@ -1,0 +1,1561 @@
+<html lang="pt-BR" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LUMINA Hair Studio | Cortes Masculinos, Femininos & Unisex</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#08080c',
+                            dark: '#0e1017',
+                            surface: '#151722',
+                            gold: '#E5A93C',
+                            'gold-light': '#FCD34D',
+                            lime: '#84CC16',
+                            'lime-bright': '#A3E635',
+                            purple: '#9333EA',
+                            'purple-light': '#C084FC',
+                            orange: '#F97316',
+                            'orange-light': '#FB923C',
+                            blue: '#2563EB',
+                            'blue-light': '#60A5FA',
+                            emerald: '#059669',
+                            'emerald-light': '#34D399',
+                        }
+                    },
+                    animation: {
+                        'glow-pulse': 'glowPulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        glowPulse: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+
+    <!-- React 18 & Babel CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #090a10;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #232738;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #383e58;
+        }
+
+        .glass-panel {
+            background: rgba(18, 20, 30, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+        }
+    </style>
+    <style>
+        /* [A11Y] Foco visível consistente em todos os interativos */
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #E5A93C;
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* [A11Y] Respeita usuários que preferem menos movimento */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* [ANIM] fadeIn usado pelo modal de agendamento (faltava o keyframe) */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.25s ease-out;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-brand-black text-slate-100 font-sans selection:bg-brand-gold/30 selection:text-white antialiased overflow-x-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- SVGs & Icons ---
+        const IconScissors = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="6" cy="6" r="3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="6" cy="18" r="3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <line x1="20" y1="4" x2="8.12" y2="15.88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <line x1="14.47" y1="14.48" x2="20" y2="20" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <line x1="8.12" y1="8.12" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        );
+
+        const IconCalendar = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2" />
+                <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2" />
+                <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2" />
+                <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2" />
+            </svg>
+        );
+
+        const IconClock = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                <polyline points="12 6 12 12 16 14" strokeWidth="2" />
+            </svg>
+        );
+
+        const IconStar = ({ className = "w-4 h-4 fill-amber-400 text-amber-400" }) => (
+            <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+        );
+
+        const IconCheck = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polyline points="20 6 9 17 4 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        );
+
+        const IconClose = ({ className = "w-6 h-6" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
+                <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+        );
+
+        // Social Media Icons
+        const IconWhatsapp = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.978-.276-.1-.476-.15-.677.15-.2.302-.777.979-.953 1.18-.175.201-.351.226-.652.076-.301-.15-1.272-.469-2.424-1.496-.897-.798-1.503-1.784-1.679-2.086-.176-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.15-.176.2-.301.301-.502.1-.2.05-.376-.025-.526-.075-.15-.677-1.633-.928-2.235-.245-.587-.494-.508-.677-.517-.176-.008-.376-.01-.577-.01-.201 0-.527.075-.803.376-.276.301-1.054 1.03-1.054 2.511 0 1.482 1.079 2.912 1.23 3.113.15.201 2.124 3.243 5.145 4.548.718.31 1.278.496 1.716.635.722.23 1.378.197 1.898.12.579-.087 1.78-.727 2.03-1.43.251-.703.251-1.305.176-1.43-.075-.125-.276-.2-.577-.35zM12.04 2C6.52 2 2.03 6.49 2.03 12.01c0 1.95.56 3.77 1.54 5.31L2 22l4.82-1.53c1.48.83 3.19 1.3 5.22 1.3 5.52 0 10.01-4.49 10.01-10.01S17.56 2 12.04 2zm0 18.27c-1.74 0-3.35-.55-4.68-1.48l-.34-.23-2.86.91.93-2.77-.23-.37a8.212 8.212 0 0 1-1.28-4.32c0-4.56 3.71-8.27 8.28-8.27 4.56 0 8.27 3.71 8.27 8.27 0 4.56-3.71 8.27-8.27 8.27z" />
+            </svg>
+        );
+
+        const IconInstagram = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth="2" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" strokeWidth="2" />
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" strokeWidth="2" />
+            </svg>
+        );
+
+        const IconFacebook = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+        );
+
+        const IconMail = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" strokeWidth="2" />
+                <polyline points="22,6 12,13 2,6" strokeWidth="2" />
+            </svg>
+        );
+
+        // Categories Configuration with strictly 2 or 3 harmonic color combos per model
+        // 1. Masculino: Deep Slate/Black + Electric Blue + Lime Green
+        // 2. Feminino: Deep Midnight Purple + Royal Gold
+        // 3. Ambos: Forest Emerald Green + Solar Orange
+        const CATEGORIES = [
+            {
+                id: 'masculino',
+                name: 'Masculino',
+                tagline: 'Precisão Urbana & Estilo Impecável',
+                description: 'Cortes com visagismo afiado, degradês milimétricos e cuidados para barba moderna.',
+                // Color combo: Blue + Lime on Dark
+                colors: {
+                    primary: '#2563EB',
+                    accent: '#84CC16',
+                    bgGlow: 'rgba(37, 99, 235, 0.15)',
+                    badgeBg: 'bg-blue-500/10 text-lime-400 border border-blue-500/30',
+                    gradientBadge: 'from-blue-600 to-lime-500',
+                    btnClass: 'bg-gradient-to-r from-blue-600 to-lime-500 hover:from-blue-500 hover:to-lime-400 text-slate-950 font-bold',
+                    borderHighlight: 'hover:border-blue-500/50',
+                    ringFocus: 'focus:ring-lime-400',
+                    bulletColor: 'text-lime-400',
+                    accentColorText: 'text-blue-400',
+                },
+                services: [
+                    {
+                        id: 'm1',
+                        title: 'Fade Precision & Textura',
+                        duration: '45 min',
+                        price: 'R$ 75',
+                        desc: 'Degradê na navalha com texturização no topo, finalização com pomada matte.',
+                        img: './assets/cortes/fade.webp',
+                        tags: ['Skin Fade', 'Styling Matte']
+                    },
+                    {
+                        id: 'm2',
+                        title: 'Combo Barba de Respeito + Corte',
+                        duration: '70 min',
+                        price: 'R$ 120',
+                        desc: 'Alinhamento completo com toalha quente, ozonioterapia e óleo essencial.',
+                        img: './assets/cortes/combobarba.webp',
+                        tags: ['Toalha Quente', 'Visagismo']
+                    },
+                    {
+                        id: 'm3',
+                        title: 'Social Cut Executivo & Acabamento',
+                        duration: '40 min',
+                        price: 'R$ 80',
+                        desc: 'Corte tradicional refinado com tesoura e encaixe anatômico perfeito.',
+                        img: './assets/cortes/socialcut.webp',
+                        tags: ['Tesoura Livre', 'Refinado']
+                    }
+                ]
+            },
+            {
+                id: 'feminino',
+                name: 'Feminino',
+                tagline: 'Sensibilidade, Fluidez & Requinte',
+                description: 'Designs inovadores, camadas orgânicas, corte a seco e valorização máxima da curvatura.',
+                // Color combo: Purple + Gold on Dark
+                colors: {
+                    primary: '#9333EA',
+                    accent: '#E5A93C',
+                    bgGlow: 'rgba(147, 51, 234, 0.16)',
+                    badgeBg: 'bg-purple-900/30 text-amber-300 border border-amber-500/30',
+                    gradientBadge: 'from-purple-600 to-amber-500',
+                    btnClass: 'bg-gradient-to-r from-purple-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-slate-950 font-bold',
+                    borderHighlight: 'hover:border-purple-500/50',
+                    ringFocus: 'focus:ring-amber-400',
+                    bulletColor: 'text-amber-400',
+                    accentColorText: 'text-purple-300',
+                },
+                services: [
+                    {
+                        id: 'f1',
+                        title: 'Butterfly Cut & Blowout Glow',
+                        duration: '60 min',
+                        price: 'R$ 130',
+                        desc: 'Camadas fluídas que garantem movimento exuberante e volume ultra natural.',
+                        img: './assets/cortes/buterfly.webp',
+                        tags: ['Volume', 'Camadas Leves']
+                    },
+                    {
+                        id: 'f2',
+                        title: 'Bob Francês Contemporâneo',
+                        duration: '50 min',
+                        price: 'R$ 110',
+                        desc: 'Linhas retas e sofisticadas na altura do maxilar com franja leve e desfiada.',
+                        img: './assets/cortes/bobfrances.webp',
+                        tags: ['Tendência Paris', 'Elegante']
+                    },
+                    {
+                        id: 'f3',
+                        title: 'Corte Especialista em Cachos & Crespos',
+                        duration: '75 min',
+                        price: 'R$ 140',
+                        desc: 'Corte a seco respeitando a geometria natural dos cachos com hidronutrição.',
+                        img: './assets/cortes/corteespe.webp',
+                        tags: ['Cachos Livres', 'Nutrição']
+                    }
+                ]
+            },
+            {
+                id: 'ambos',
+                name: 'Ambos / Unisex',
+                tagline: 'Versatilidade, Autenticidade & Sem Rótulos',
+                description: 'Estéticas modernas, wolf cuts, mullets contemporâneos, buzz designs e cabelos autorais.',
+                // Color combo: Emerald Green + Solar Orange on Dark
+                colors: {
+                    primary: '#059669',
+                    accent: '#F97316',
+                    bgGlow: 'rgba(5, 150, 105, 0.16)',
+                    badgeBg: 'bg-emerald-950/40 text-orange-400 border border-orange-500/30',
+                    gradientBadge: 'from-emerald-500 to-orange-500',
+                    btnClass: 'bg-gradient-to-r from-emerald-500 to-orange-500 hover:from-emerald-400 hover:to-orange-400 text-slate-950 font-bold',
+                    borderHighlight: 'hover:border-emerald-500/50',
+                    ringFocus: 'focus:ring-orange-400',
+                    bulletColor: 'text-orange-400',
+                    accentColorText: 'text-emerald-400',
+                },
+                services: [
+                    {
+                        id: 'a1',
+                        title: 'Wolf Cut & Shag Moderno',
+                        duration: '60 min',
+                        price: 'R$ 125',
+                        desc: 'Estilo desconectado e rebelde com camadas rebeldes que se adaptam a qualquer gênero.',
+                        img: './assets/cortes/wolfcut.webp',
+                        tags: ['Desconectado', 'Sem Gênero']
+                    },
+                    {
+                        id: 'a2',
+                        title: 'Modern Mullet Criativo',
+                        duration: '50 min',
+                        price: 'R$ 95',
+                        desc: 'Frente curta com nuca alongada, adaptada ao gosto minimalista ou ousado.',
+                        img: './assets/cortes/modernmullet.webp',
+                        tags: ['Underground', 'Personalizado']
+                    },
+                    {
+                        id: 'a3',
+                        title: 'Buzz Cut com Freestyle Hair Tattoo',
+                        duration: '40 min',
+                        price: 'R$ 85',
+                        desc: 'Raspado geométrico com traços artísticos e desenhos de linhas limpas.',
+                        img: './assets/cortes/buzzcut.webp',
+                        tags: ['Arte Geométrica', 'Ousado']
+                    }
+                ]
+            }
+        ];
+
+        const TEAM = [
+            {
+                name: 'Rafael Valente',
+                role: 'Master Barber & Visagista',
+                spec: 'Fade, Barbas Esculpidas & Navalhados',
+                experience: '9 anos de estúdio',
+                combo: 'blue-lime',
+                colorBadge: 'bg-blue-500/10 text-lime-400 border-blue-500/30',
+                img: './assets/equipe/petcao.webp'
+            },
+            {
+                name: 'Camila Albuquerque',
+                role: 'Stylist & Colorista Sênior',
+                spec: 'Camadas, Visagismo Feminino & Iluminação',
+                experience: '11 anos de carreira',
+                combo: 'purple-gold',
+                colorBadge: 'bg-purple-900/30 text-amber-300 border-amber-500/30',
+                img: './assets/equipe/petpapagaio.webp'
+            },
+            {
+                name: 'Alex Rivera',
+                role: 'Hair Artist & Tendências Unisex',
+                spec: 'Wolf Cut, Shag, Texturas & Freestyle',
+                experience: '7 anos no circuito global',
+                combo: 'green-orange',
+                colorBadge: 'bg-emerald-950/40 text-orange-400 border-orange-500/30',
+                img: './assets/equipe/petgato.webp'
+            }
+        ];
+
+        function App() {
+            const [activeCategory, setActiveCategory] = useState('todos');
+            const [bookingModalOpen, setBookingModalOpen] = useState(false);
+            const [selectedService, setSelectedService] = useState(null);
+            const [bookingSuccess, setBookingSuccess] = useState(false);
+            const [notification, setNotification] = useState('');
+
+            // [FIX 6] Estado de envio para desabilitar botão e evitar duplo clique
+            const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+            const [isSubmittingContact, setIsSubmittingContact] = useState(false);
+
+            // [FIX 7] Estado controlado do formulário de contato rápido
+            const [contactForm, setContactForm] = useState({
+                name: '',
+                phone: '',
+                category: 'masculino',
+                message: ''
+            });
+
+            // Form state for scheduling
+            const [formData, setFormData] = useState({
+                name: '',
+                phone: '',
+                category: 'masculino',
+                serviceId: 'm1',
+                artist: '',
+                date: '',
+                time: '14:00',
+                notes: ''
+            });
+
+            // [FIX 5] Refs para cleanup de timers (evita memory leak e callbacks órfãos)
+            const toastTimerRef = React.useRef(null);
+            const bookingTimersRef = React.useRef([]);
+
+            // [FIX 5] Cleanup de todos os timers ao desmontar
+            useEffect(() => {
+                return () => {
+                    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                    bookingTimersRef.current.forEach(t => clearTimeout(t));
+                    bookingTimersRef.current = [];
+                };
+            }, []);
+
+            // Filtered services
+            const currentServices = useMemo(() => {
+                if (activeCategory === 'todos') {
+                    return CATEGORIES.flatMap(cat =>
+                        cat.services.map(s => ({ ...s, catId: cat.id, catName: cat.name, catColors: cat.colors }))
+                    );
+                }
+                const found = CATEGORIES.find(c => c.id === activeCategory);
+                return found ? found.services.map(s => ({ ...s, catId: found.id, catName: found.name, catColors: found.colors })) : [];
+            }, [activeCategory]);
+
+            // [FIX 12] Se não vier serviço, seleciona o primeiro serviço da categoria alvo
+            // para manter formData.serviceId e selectedService sempre coerentes.
+            // [FIX 2] Aceita artistName para registrar com quem é o agendamento.
+            const handleOpenBooking = (service = null, catId = null, artistName = '') => {
+                if (service) {
+                    setSelectedService(service);
+                    setFormData(prev => ({
+                        ...prev,
+                        category: catId || service.catId || 'masculino',
+                        serviceId: service.id,
+                        artist: artistName || ''
+                    }));
+                } else {
+                    // Sem serviço explícito: ancora na categoria e no primeiro serviço dela
+                    const targetCatId = catId || 'masculino';
+                    const targetCat = CATEGORIES.find(c => c.id === targetCatId) || CATEGORIES[0];
+                    const firstService = targetCat.services[0];
+                    setSelectedService(firstService);
+                    setFormData(prev => ({
+                        ...prev,
+                        category: targetCat.id,
+                        serviceId: firstService.id,
+                        artist: artistName || ''
+                    }));
+                }
+                setBookingSuccess(false);
+                setIsSubmittingBooking(false);
+                setBookingModalOpen(true);
+            };
+            // [FIX 4] Garante que a mensagem sempre use o título legível do serviço
+            // [FIX 6] window.open disparado no clique (não em setTimeout) para não ser bloqueado
+            // [FIX 14] Abre o WhatsApp imediatamente; os timers só cuidam da UI de feedback
+            const handleFormSubmit = (e) => {
+                e.preventDefault();
+                if (isSubmittingBooking) return;
+
+                // Resolve o serviço de forma robusta: estado > seleção > primeiro da categoria
+                const cat = CATEGORIES.find(c => c.id === formData.category) || CATEGORIES[0];
+                const svc = selectedService
+                    || cat.services.find(s => s.id === formData.serviceId)
+                    || cat.services[0];
+
+                const dateLabel = formData.date || 'Data a combinar';
+                const artistLine = formData.artist ? `\n- Especialista: ${formData.artist}` : '';
+                const message = encodeURIComponent(
+                    `Olá LUMINA Studio! Gostaria de confirmar meu agendamento:\n` +
+                    `- Cliente: ${formData.name}\n` +
+                    `- Telefone: ${formData.phone}\n` +
+                    `- Serviço: ${svc.title}` +
+                    artistLine +
+                    `\n- Data: ${dateLabel} às ${formData.time}` +
+                    (formData.notes ? `\n- Observações: ${formData.notes}` : '')
+                );
+                const whatsappUrl = `https://wa.me/5511999999999?text=${message}`;
+
+                // Abre o WhatsApp imediatamente (dentro do gesto do usuário → não bloqueado)
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+                setIsSubmittingBooking(true);
+                setBookingSuccess(true);
+                setNotification('Agendamento pré-confirmado! Abrimos o WhatsApp em nova aba.');
+
+                // [FIX 5] Timers rastreados para cleanup
+                const t1 = setTimeout(() => {
+                    setBookingModalOpen(false);
+                    setBookingSuccess(false);
+                    setIsSubmittingBooking(false);
+                    setNotification('');
+                }, 1800);
+                bookingTimersRef.current.push(t1);
+            };
+
+            // [FIX 5] Toast com timer rastreado (evita acúmulo e callbacks órfãos)
+            const showToast = (text) => {
+                setNotification(text);
+                if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+                toastTimerRef.current = setTimeout(() => {
+                    setNotification('');
+                    toastTimerRef.current = null;
+                }, 3500);
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col relative bg-brand-black">
+
+                    {/* Dynamic Background Glowing Blobs (Harmonious Tri-accent background without rainbow clutter) */}
+                    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+                        {/* Top right: Electric Blue + Lime touch */}
+                        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-blue-600/10 blur-[120px] animate-glow-pulse" />
+                        {/* Center left: Deep Purple + Gold touch */}
+                        <div className="absolute top-[40%] -left-32 w-[30rem] h-[30rem] rounded-full bg-purple-600/10 blur-[140px]" />
+                        {/* Bottom: Forest Green + Warm Orange glow */}
+                        <div className="absolute -bottom-20 right-1/4 w-[28rem] h-[28rem] rounded-full bg-emerald-600/10 blur-[130px]" />
+                    </div>
+
+                    {/* Toast Notification */}
+                    {notification && (
+                        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 glass-panel px-6 py-3 rounded-full border border-brand-gold/40 text-brand-gold shadow-2xl flex items-center gap-3 animate-bounce">
+                            <span className="w-2.5 h-2.5 rounded-full bg-brand-gold animate-ping" />
+                            <span className="text-sm font-semibold">{notification}</span>
+                        </div>
+                    )}
+
+                    {/* ================= HEADER / NAV ================= */}
+                    <header className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-brand-black/75 border-b border-white/5 transition-all">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+
+                            {/* Brand Logo */}
+                            <a href="#" className="flex items-center gap-3 group">
+                                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-blue via-brand-purple to-brand-gold p-[2px] shadow-lg group-hover:scale-105 transition duration-300">
+                                    <div className="w-full h-full bg-brand-dark rounded-[14px] flex items-center justify-center">
+                                        <IconScissors className="w-5 h-5 text-brand-gold group-hover:rotate-45 transition duration-300" />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-display font-black text-xl tracking-wider text-white">
+                                        LUMINA<span className="text-brand-gold">.</span>
+                                    </span>
+                                    <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-slate-400">
+                                        Atelier Capilar
+                                    </span>
+                                </div>
+                            </a>
+
+                            {/* Navigation Links */}
+                            <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                                <a href="#experiencia" className="hover:text-white transition">Categorias</a>
+                                <a href="#servicos" className="hover:text-white transition">Serviços</a>
+                                <a href="#equipe" className="hover:text-white transition">Artistas</a>
+                                <a href="#contato" className="hover:text-white transition">Localização</a>
+                            </nav>
+
+                            {/* Quick Actions & Social Icons */}
+                            <div className="flex items-center gap-3">
+                                <div className="hidden lg:flex items-center gap-2 border-r border-white/10 pr-3 mr-1">
+                                    <a
+                                        href="https://instagram.com"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 text-slate-400 hover:text-purple-400 transition hover:bg-white/5 rounded-lg"
+                                        title="Instagram"
+                                    >
+                                        <IconInstagram className="w-4 h-4" />
+                                    </a>
+                                    <a
+                                        href="https://facebook.com"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 text-slate-400 hover:text-blue-400 transition hover:bg-white/5 rounded-lg"
+                                        title="Facebook"
+                                    >
+                                        <IconFacebook className="w-4 h-4" />
+                                    </a>
+                                    <a
+                                        href="mailto:contato@luminastudio.com"
+                                        className="p-2 text-slate-400 hover:text-orange-400 transition hover:bg-white/5 rounded-lg"
+                                        title="E-mail"
+                                    >
+                                        <IconMail className="w-4 h-4" />
+                                    </a>
+                                </div>
+
+                                <button
+                                    onClick={() => handleOpenBooking()}
+                                    className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-neutral-950 shadow-lg shadow-amber-500/20 active:scale-95 transition"
+                                >
+                                    Agendar Agora
+                                </button>
+                            </div>
+
+                        </div>
+                    </header>
+
+                    {/* ================= HERO SECTION ================= */}
+                    <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                        <div className="grid lg:grid-cols-12 gap-12 items-center">
+
+                            {/* Left Column: Headlines & Concept */}
+                            <div className="lg:col-span-7 space-y-6">
+
+                                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                                    Conceito Tricolor Harmonizado & Visagismo Moderno
+                                </div>
+
+                                <h1 className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
+                                    A alta precisão do corte em{' '}
+                                    <span className="bg-gradient-to-r from-blue-400 via-purple-300 to-amber-300 bg-clip-text text-transparent">
+                                        três universos exclusivos.
+                                    </span>
+                                </h1>
+
+                                <p className="text-base sm:text-lg text-slate-400 max-w-xl font-normal leading-relaxed">
+                                    Experiências personalizadas com paletas e identidades singulares. Não fazemos apenas cortes: desenhamos a sua presença em estilos <strong className="text-white">Masculino</strong>, <strong className="text-white">Feminino</strong> e <strong className="text-white">Unisex</strong>.
+                                </p>
+
+                                {/* 3 Color Combos Cards Summary */}
+                                <div className="grid grid-cols-3 gap-3 pt-2 max-w-lg">
+                                    {/* Masculino Tag: Blue + Lime */}
+                                    <div
+                                        onClick={() => setActiveCategory('masculino')}
+                                        className="cursor-pointer p-3 rounded-xl bg-slate-900/60 border border-blue-500/30 hover:border-lime-400 transition hover:scale-105 text-left group"
+                                    >
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                            <span className="w-2.5 h-2.5 rounded-full bg-lime-400"></span>
+                                        </div>
+                                        <p className="text-xs font-bold text-white group-hover:text-lime-300">Masculino</p>
+                                        <p className="text-[10px] text-slate-400">Azul & Verde Limão</p>
+                                    </div>
+
+                                    {/* Feminino Tag: Purple + Gold */}
+                                    <div
+                                        onClick={() => setActiveCategory('feminino')}
+                                        className="cursor-pointer p-3 rounded-xl bg-slate-900/60 border border-purple-500/30 hover:border-amber-400 transition hover:scale-105 text-left group"
+                                    >
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                        </div>
+                                        <p className="text-xs font-bold text-white group-hover:text-amber-300">Feminino</p>
+                                        <p className="text-[10px] text-slate-400">Roxo & Dourado</p>
+                                    </div>
+
+                                    {/* Unisex Tag: Green + Orange */}
+                                    <div
+                                        onClick={() => setActiveCategory('ambos')}
+                                        className="cursor-pointer p-3 rounded-xl bg-slate-900/60 border border-emerald-500/30 hover:border-orange-400 transition hover:scale-105 text-left group"
+                                    >
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                            <span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+                                        </div>
+                                        <p className="text-xs font-bold text-white group-hover:text-orange-300">Ambos</p>
+                                        <p className="text-[10px] text-slate-400">Verde & Laranja</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-4 pt-4">
+                                    <a
+                                        href="#servicos"
+                                        className="px-7 py-3.5 rounded-xl font-bold text-sm bg-white text-neutral-950 hover:bg-slate-200 transition shadow-xl shadow-white/5"
+                                    >
+                                        Explorar Catálogo
+                                    </a>
+                                    <a
+                                        href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20os%20servi%C3%A7os%20do%20LUMINA."
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="px-6 py-3.5 rounded-xl font-semibold text-sm glass-panel border border-emerald-500/30 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 transition flex items-center gap-2.5"
+                                    >
+                                        <IconWhatsapp className="w-4 h-4 text-emerald-400" />
+                                        Falar com Stylist
+                                    </a>
+                                </div>
+
+                            </div>
+
+                            {/* Right Column: Hero Visual Feature Box */}
+                            <div className="lg:col-span-5 relative">
+                                <div className="relative mx-auto max-w-md">
+
+                                    {/* Decorative backdrop glow */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/30 via-purple-600/30 to-amber-500/30 rounded-3xl blur-2xl transform -rotate-3 scale-95" />
+
+                                    {/* Main Feature Showcase Card */}
+                                    <div className="relative glass-panel rounded-3xl p-4 sm:p-5 border border-white/10 shadow-2xl">
+                                        <div className="relative h-96 w-full rounded-2xl overflow-hidden mb-4">
+                                            <img
+                                                src="./assets/capa.webp"
+                                                alt="Hair Stylist in action"
+                                                className="w-full h-full object-cover transform hover:scale-105 transition duration-700"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
+                                                <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/20">
+                                                    <span className="text-slate-300">Ambiente Climatizado & Bar</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 bg-amber-500/20 backdrop-blur-md border border-amber-400/40 text-amber-300 px-2.5 py-1 rounded-lg">
+                                                    <IconStar className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                                    <span className="font-bold">4.9 / 5.0 (640+ avaliações)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Quick Stats Grid */}
+                                        <div className="grid grid-cols-3 gap-2 text-center">
+                                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                                <p className="text-xl font-display font-bold text-blue-400">100%</p>
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Visagismo</p>
+                                            </div>
+                                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                                <p className="text-xl font-display font-bold text-amber-300">3 Estéticas</p>
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Categorias</p>
+                                            </div>
+                                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                                <p className="text-xl font-display font-bold text-lime-400">Zero</p>
+                                                <p className="text-[10px] text-slate-400 uppercase tracking-wider">Espera c/ Reserva</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                    {/* ================= CATEGORY SELECTION & COLOR THEMES ================= */}
+                    <section id="experiencia" className="py-12 bg-brand-dark/50 border-y border-white/5">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                            <div className="text-center max-w-2xl mx-auto mb-10">
+                                <h2 className="text-xs uppercase font-extrabold tracking-[0.2em] text-slate-400 mb-2">
+                                    Identidades Visuais Exclusivas
+                                </h2>
+                                <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
+                                    Escolha o seu Espaço de Transformação
+                                </h3>
+                                <p className="text-slate-400 text-sm mt-2">
+                                    Cada categoria possui sua combinação harmônica de tons, sem excessos e com foco total no seu estilo.
+                                </p>
+                            </div>
+
+                            {/* 3 Categories Cards Showcase */}
+                            <div className="grid md:grid-cols-3 gap-6">
+
+                                {/* 1. Masculino Card (Preto + Azul + Verde Limão) */}
+                                <div
+                                    onClick={() => { setActiveCategory('masculino'); document.getElementById('servicos').scrollIntoView({ behavior: 'smooth' }); }}
+                                    className={`cursor-pointer rounded-2xl p-6 transition-all duration-300 relative overflow-hidden group border ${activeCategory === 'masculino'
+                                        ? 'border-blue-500 bg-blue-950/20 shadow-xl shadow-blue-900/20'
+                                        : 'border-blue-900/30 bg-[#0b1220]/60 hover:border-lime-400/60'
+                                        }`}
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl group-hover:bg-lime-500/15 transition duration-500" />
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider bg-blue-600/20 text-lime-400 border border-lime-400/30">
+                                            MODELO MASCULINO
+                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 rounded-full bg-blue-600" title="Azul Profundo"></span>
+                                            <span className="w-3 h-3 rounded-full bg-lime-400" title="Verde Limão Elétrico"></span>
+                                        </div>
+                                    </div>
+
+                                    <h4 className="font-display text-xl font-bold text-white mb-2 group-hover:text-lime-300 transition">
+                                        Cortes & Barba Masculina
+                                    </h4>
+                                    <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+                                        Combinação afiada de <strong>Azul e Verde Limão</strong>: fade milimétrico, contornos precisos na navalha e finalização de alta fixação.
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                                        <span className="text-lime-400 font-semibold">Ver 3 serviços especializados →</span>
+                                        <span className="text-slate-400">A partir de R$ 75</span>
+                                    </div>
+                                </div>
+
+                                {/* 2. Feminino Card (Preto + Roxo + Dourado) */}
+                                <div
+                                    onClick={() => { setActiveCategory('feminino'); document.getElementById('servicos').scrollIntoView({ behavior: 'smooth' }); }}
+                                    className={`cursor-pointer rounded-2xl p-6 transition-all duration-300 relative overflow-hidden group border ${activeCategory === 'feminino'
+                                        ? 'border-purple-500 bg-purple-950/20 shadow-xl shadow-purple-900/20'
+                                        : 'border-purple-900/30 bg-[#160c22]/60 hover:border-amber-400/60'
+                                        }`}
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-amber-500/15 transition duration-500" />
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider bg-purple-900/30 text-amber-300 border border-amber-400/30">
+                                            MODELO FEMININO
+                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 rounded-full bg-purple-600" title="Roxo Imperial"></span>
+                                            <span className="w-3 h-3 rounded-full bg-amber-400" title="Dourado Nobre"></span>
+                                        </div>
+                                    </div>
+
+                                    <h4 className="font-display text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition">
+                                        Cortes & Estilização Feminina
+                                    </h4>
+                                    <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+                                        Harmonia entre <strong>Roxo e Dourado</strong>: cortes em camadas, bobs parisienses e valorização de texturas com acabamento premium.
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                                        <span className="text-amber-400 font-semibold">Ver 3 serviços refinados →</span>
+                                        <span className="text-slate-400">A partir de R$ 110</span>
+                                    </div>
+                                </div>
+
+                                {/* 3. Ambos / Unisex Card (Preto + Verde Esmeralda + Laranja Solar) */}
+                                <div
+                                    onClick={() => { setActiveCategory('ambos'); document.getElementById('servicos').scrollIntoView({ behavior: 'smooth' }); }}
+                                    className={`cursor-pointer rounded-2xl p-6 transition-all duration-300 relative overflow-hidden group border ${activeCategory === 'ambos'
+                                        ? 'border-emerald-500 bg-emerald-950/20 shadow-xl shadow-emerald-900/20'
+                                        : 'border-emerald-900/30 bg-[#071913]/60 hover:border-orange-400/60'
+                                        }`}
+                                >
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl group-hover:bg-orange-500/15 transition duration-500" />
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wider bg-emerald-950/40 text-orange-400 border border-orange-400/30">
+                                            MODELO AMBOS / UNISEX
+                                        </span>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-3 h-3 rounded-full bg-emerald-500" title="Verde Floresta"></span>
+                                            <span className="w-3 h-3 rounded-full bg-orange-500" title="Laranja Solar"></span>
+                                        </div>
+                                    </div>
+
+                                    <h4 className="font-display text-xl font-bold text-white mb-2 group-hover:text-orange-300 transition">
+                                        Cortes Unisex & Conceituais
+                                    </h4>
+                                    <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+                                        Sinergia viva de <strong>Verde Esmeralda e Laranja</strong>: wolf cuts, mullets contemporâneos e designs sem rótulos ou barreiras.
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                                        <span className="text-orange-400 font-semibold">Ver 3 serviços modernos →</span>
+                                        <span className="text-slate-400">A partir de R$ 85</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </section>
+
+                    {/* ================= INTERACTIVE SERVICES CATALOG ================= */}
+                    <section id="servicos" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+
+                        {/* Filter Tabs */}
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                            <div>
+                                <span className="text-xs uppercase font-extrabold tracking-wider text-slate-400">Menu de Técnicas</span>
+                                <h2 className="font-display text-3xl sm:text-4xl font-black text-white mt-1">
+                                    Cardápio de Cortes & Preços
+                                </h2>
+                            </div>
+
+                            {/* Category Filter Pills */}
+                            <div className="inline-flex p-1.5 rounded-2xl bg-white/5 border border-white/10 self-start md:self-auto overflow-x-auto max-w-full">
+                                <button
+                                    onClick={() => setActiveCategory('todos')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${activeCategory === 'todos'
+                                        ? 'bg-white text-neutral-950 shadow-md'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
+                                >
+                                    Todos os Modelos
+                                </button>
+                                <button
+                                    onClick={() => setActiveCategory('masculino')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${activeCategory === 'masculino'
+                                        ? 'bg-blue-600 text-lime-300 shadow-md'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-lime-400"></span>
+                                    Masculino
+                                </button>
+                                <button
+                                    onClick={() => setActiveCategory('feminino')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${activeCategory === 'feminino'
+                                        ? 'bg-purple-700 text-amber-300 shadow-md'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    Feminino
+                                </button>
+                                <button
+                                    onClick={() => setActiveCategory('ambos')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${activeCategory === 'ambos'
+                                        ? 'bg-emerald-600 text-orange-300 shadow-md'
+                                        : 'text-slate-400 hover:text-white'
+                                        }`}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-orange-400"></span>
+                                    Ambos (Unisex)
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Services Grid */}
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {currentServices.map((service) => {
+                                const colors = service.catColors;
+                                return (
+                                    <div
+                                        key={service.id}
+                                        className={`glass-panel rounded-3xl overflow-hidden border border-white/10 ${colors.borderHighlight} glass-card-hover flex flex-col group`}
+                                    >
+                                        {/* Image with overlay badge */}
+                                        <div className="relative h-60 w-full overflow-hidden">
+                                            <img
+                                                src={service.img}
+                                                alt={service.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-90" />
+
+                                            {/* Category Badge */}
+                                            <div className="absolute top-4 left-4">
+                                                <span className={`text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full ${colors.badgeBg}`}>
+                                                    {service.catName}
+                                                </span>
+                                            </div>
+
+                                            {/* Price Badge */}
+                                            <div className="absolute top-4 right-4 bg-brand-black/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-white font-display font-bold text-sm">
+                                                {service.price}
+                                            </div>
+
+                                            {/* Duration */}
+                                            <div className="absolute bottom-3 left-4 flex items-center gap-1.5 text-xs text-slate-300">
+                                                <IconClock className="w-3.5 h-3.5 text-slate-400" />
+                                                <span>{service.duration}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                            <div>
+                                                <h3 className="font-display font-bold text-lg text-white group-hover:text-slate-200 transition">
+                                                    {service.title}
+                                                </h3>
+                                                <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+                                                    {service.desc}
+                                                </p>
+                                            </div>
+
+                                            {/* Tags */}
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {service.tags.map((t, idx) => (
+                                                    <span key={idx} className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-white/5 text-slate-300 border border-white/5">
+                                                        #{t}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            {/* CTA Button */}
+                                            <div className="pt-2">
+                                                <button
+                                                    onClick={() => handleOpenBooking(service, service.catId)}
+                                                    className={`w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition ${colors.btnClass} active:scale-95 shadow-md`}
+                                                >
+                                                    Agendar Este Corte
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Banner Consultation info */}
+                        <div className="mt-14 glass-panel rounded-3xl p-8 border border-white/10 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                            <div className="space-y-2 text-center lg:text-left">
+                                <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Dúvidas sobre o melhor corte?</span>
+                                <h4 className="font-display text-2xl font-bold text-white">Consultoria de Visagismo Digital Pré-Atendimento</h4>
+                                <p className="text-slate-400 text-sm max-w-xl">
+                                    Envie sua foto e inspirações para nossa equipe via WhatsApp. Analisamos formato de rosto e estilo sem compromisso.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    window.open('https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20uma%20consultoria%20de%20visagismo%20gratuita%20para%20meu%20corte.', '_blank');
+                                }}
+                                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-lime-400 text-slate-950 font-extrabold text-sm flex items-center gap-2 hover:opacity-95 transition shadow-lg shrink-0"
+                            >
+                                <IconWhatsapp className="w-5 h-5 text-slate-950" />
+                                Consultoria no WhatsApp
+                            </button>
+                        </div>
+
+                    </section>
+
+                    {/* ================= TEAM / ARTISTS SPOTLIGHT ================= */}
+                    <section id="equipe" className="py-16 bg-brand-dark/40 border-t border-white/5">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                            <div className="text-center max-w-xl mx-auto mb-12">
+                                <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Time Criativo</span>
+                                <h2 className="font-display text-3xl font-bold text-white mt-1">Especialistas por Modelo</h2>
+                                <p className="text-slate-400 text-sm mt-2">
+                                    Cada profissional domina a estética e as peculiaridades técnicas de cada formato de corte.
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {TEAM.map((artist, idx) => (
+                                    <div key={idx} className="glass-panel p-6 rounded-3xl border border-white/10 hover:border-white/20 transition group">
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <img
+                                                src={artist.img}
+                                                alt={artist.name}
+                                                className="w-16 h-16 rounded-2xl object-cover border border-white/20 group-hover:scale-105 transition"
+                                            />
+                                            <div>
+                                                <h4 className="font-bold text-white text-base font-display">{artist.name}</h4>
+                                                <p className="text-xs text-slate-400">{artist.role}</p>
+                                                <span className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${artist.colorBadge}`}>
+                                                    {artist.experience}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-slate-300 leading-relaxed border-t border-white/5 pt-3">
+                                            <strong>Especialidade:</strong> {artist.spec}
+                                        </p>
+                                        <button
+                                            onClick={() => handleOpenBooking(
+                                                null,
+                                                idx === 0 ? 'masculino' : idx === 1 ? 'feminino' : 'ambos',
+                                                artist.name
+                                            )}
+                                            className="mt-4 w-full py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-white transition border border-white/10"
+                                        >
+                                            Agendar com {artist.name.split(' ')[0]}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
+                    </section>
+
+                    {/* ================= SOCIAL & CONTACT SECTION ================= */}
+                    <section id="contato" className="py-20 relative">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                            <div className="glass-panel rounded-3xl p-8 sm:p-12 border border-white/10 relative overflow-hidden">
+                                {/* Visual accent */}
+                                <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-br from-amber-500/10 via-purple-600/10 to-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                                <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+                                    {/* Left Column: Info & Opening Hours */}
+                                    <div className="space-y-6">
+                                        <span className="text-xs font-extrabold uppercase tracking-wider text-brand-gold">
+                                            Conexão Direta
+                                        </span>
+                                        <h2 className="font-display text-3xl sm:text-4xl font-black text-white">
+                                            Estamos prontos para desenhar a sua melhor versão.
+                                        </h2>
+                                        <p className="text-slate-400 text-sm leading-relaxed">
+                                            Agende pelo site ou mande uma mensagem em qualquer canal social. Respondemos em média em menos de 10 minutos durante o expediente.
+                                        </p>
+
+                                        {/* Hours */}
+                                        <div className="space-y-2 border-l-2 border-amber-400/40 pl-4 py-1 text-xs">
+                                            <p className="text-white font-bold">Horário de Funcionamento:</p>
+                                            <p className="text-slate-400">Terça a Sábado: 09:00 às 20:30</p>
+                                            <p className="text-slate-400">Domingo: 10:00 às 17:00 (Plantão de Agendamentos)</p>
+                                        </div>
+
+                                        {/* Social Hub Grid - WhatsApp, Facebook, Instagram, E-mail */}
+                                        <div className="pt-2">
+                                            <p className="text-xs font-bold text-slate-300 mb-3 uppercase tracking-wider">
+                                                Nossos Contatos Oficiais:
+                                            </p>
+
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                {/* WhatsApp */}
+                                                <a
+                                                    href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20LUMINA."
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex flex-col items-center p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 hover:border-emerald-400 text-emerald-400 hover:scale-105 transition text-center group"
+                                                >
+                                                    <IconWhatsapp className="w-6 h-6 mb-1 text-emerald-400 group-hover:animate-bounce" />
+                                                    <span className="text-[11px] font-bold">WhatsApp</span>
+                                                    <span className="text-[9px] text-slate-400">(11) 99999-9999</span>
+                                                </a>
+
+                                                {/* Instagram */}
+                                                <a
+                                                    href="https://instagram.com"
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex flex-col items-center p-3 rounded-2xl bg-purple-950/40 border border-purple-500/40 hover:border-amber-400 text-purple-300 hover:scale-105 transition text-center group"
+                                                >
+                                                    <IconInstagram className="w-6 h-6 mb-1 text-purple-400 group-hover:rotate-12 transition" />
+                                                    <span className="text-[11px] font-bold">Instagram</span>
+                                                    <span className="text-[9px] text-slate-400">@luminahairstudio</span>
+                                                </a>
+
+                                                {/* Facebook */}
+                                                <a
+                                                    href="https://facebook.com"
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="flex flex-col items-center p-3 rounded-2xl bg-blue-950/40 border border-blue-500/40 hover:border-blue-400 text-blue-400 hover:scale-105 transition text-center group"
+                                                >
+                                                    <IconFacebook className="w-6 h-6 mb-1 text-blue-400 group-hover:scale-110 transition" />
+                                                    <span className="text-[11px] font-bold">Facebook</span>
+                                                    <span className="text-[9px] text-slate-400">/luminahairstudio</span>
+                                                </a>
+
+                                                {/* E-mail */}
+                                                <a
+                                                    href="mailto:contato@luminastudio.com"
+                                                    className="flex flex-col items-center p-3 rounded-2xl bg-orange-950/40 border border-orange-500/40 hover:border-orange-400 text-orange-400 hover:scale-105 transition text-center group"
+                                                >
+                                                    <IconMail className="w-6 h-6 mb-1 text-orange-400 group-hover:-translate-y-1 transition" />
+                                                    <span className="text-[11px] font-bold">E-mail</span>
+                                                    <span className="text-[9px] text-slate-400">contato@lumina.com</span>
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    {/* Right Column: Quick Contact Form */}
+                                    <div className="bg-brand-black/60 p-6 sm:p-8 rounded-2xl border border-white/10 shadow-inner">
+                                        <h3 className="font-display font-bold text-lg text-white mb-1">
+                                            Envie uma Mensagem Rápida
+                                        </h3>
+                                        <p className="text-xs text-slate-400 mb-6">
+                                            Responderemos via e-mail ou WhatsApp em instantes.
+                                        </p>
+
+                                        {/* [FIX 7] Formulário controlado — valores disponíveis para envio futuro (WhatsApp/e-mail) */}
+                                        <form
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                if (isSubmittingContact) return;
+                                                setIsSubmittingContact(true);
+
+                                                // Ponto de integração futuro: aqui você pode enviar
+                                                // contactForm para uma API, WhatsApp ou e-mail.
+                                                // Ex.: window.open(`https://wa.me/...?text=${encodeURIComponent(...)}`)
+                                                console.log('[Contato rápido] payload:', contactForm);
+
+                                                showToast('Mensagem enviada com sucesso! Logo entraremos em contato.');
+
+                                                // [FIX 5] Timer rastreado
+                                                const t = setTimeout(() => {
+                                                    setContactForm({ name: '', phone: '', category: 'masculino', message: '' });
+                                                    setIsSubmittingContact(false);
+                                                }, 800);
+                                                bookingTimersRef.current.push(t);
+                                            }}
+                                            className="space-y-4"
+                                        >
+                                            <div>
+                                                <label htmlFor="contact-name" className="block text-[11px] uppercase tracking-wider font-semibold text-slate-300 mb-1">Seu Nome</label>
+                                                <input
+                                                    id="contact-name"
+                                                    name="name"
+                                                    type="text"
+                                                    required
+                                                    placeholder="Ex: Gabriel Souza"
+                                                    value={contactForm.name}
+                                                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                                                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400 transition"
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label htmlFor="contact-phone" className="block text-[11px] uppercase tracking-wider font-semibold text-slate-300 mb-1">Telefone / WhatsApp</label>
+                                                    <input
+                                                        id="contact-phone"
+                                                        name="phone"
+                                                        type="tel"
+                                                        required
+                                                        placeholder="(11) 99999-9999"
+                                                        value={contactForm.phone}
+                                                        onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                                                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400 transition"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="contact-category" className="block text-[11px] uppercase tracking-wider font-semibold text-slate-300 mb-1">Categoria de Interesse</label>
+                                                    <select
+                                                        id="contact-category"
+                                                        name="category"
+                                                        value={contactForm.category}
+                                                        onChange={(e) => setContactForm({ ...contactForm, category: e.target.value })}
+                                                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400 transition"
+                                                    >
+                                                        <option value="masculino">Masculino (Azul + Limão)</option>
+                                                        <option value="feminino">Feminino (Roxo + Dourado)</option>
+                                                        <option value="ambos">Ambos / Unisex (Verde + Laranja)</option>
+                                                        <option value="duvidas">Outro / Consultoria</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="contact-message" className="block text-[11px] uppercase tracking-wider font-semibold text-slate-300 mb-1">Como podemos te ajudar?</label>
+                                                <textarea
+                                                    id="contact-message"
+                                                    name="message"
+                                                    rows="3"
+                                                    required
+                                                    placeholder="Conte-nos o estilo que procura ou sua dúvida..."
+                                                    value={contactForm.message}
+                                                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                                                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400 transition"
+                                                ></textarea>
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmittingContact}
+                                                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed"
+                                            >
+                                                {isSubmittingContact ? 'Enviando...' : 'Enviar Contato'}
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </section>
+
+                    {/* ================= FOOTER ================= */}
+                    <footer className="border-t border-white/5 bg-brand-dark py-10 mt-auto text-xs text-slate-400">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                            {/* [NOVO] Aviso de projeto fictício */}
+                            <div className="glass-panel rounded-2xl px-5 py-4 mb-8 border border-brand-gold/30 flex items-start gap-3">
+                                <span className="w-2 h-2 rounded-full bg-brand-gold mt-2 shrink-0" aria-hidden="true" />
+                                <p className="text-slate-300 leading-relaxed">
+                                    <strong className="text-white">Aviso:</strong> a marca <strong>LUMINA Hair Studio</strong>,
+                                    seus profissionais, preços, serviços, avaliações, números de contato e
+                                    estatísticas são <strong>fictícios</strong>. Este site foi desenvolvido como
+                                    <strong>estudo de caso de front-end com React 18</strong> para o portfólio de{' '}
+                                    <a
+                                        href="https://github.com/Dev-KyrraH"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-brand-gold underline hover:text-amber-200"
+                                    >
+                                        Dev-KyrraH
+                                    </a>
+                                    , com o objetivo de demonstrar habilidades em React, JSX, Tailwind CSS,
+                                    componentização, gerenciamento de estado e integração com WhatsApp.
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+
+                                <div className="flex items-center gap-2">
+                                    <span className="font-display font-black text-base text-white">LUMINA HAIR STUDIO</span>
+                                    <span className="text-slate-600">|</span>
+                                    <span>Design Cromático & Visagismo Integrado</span>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-6">
+                                    <span className="flex items-center gap-1.5 text-slate-300">
+                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span> Masculino
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-slate-300">
+                                        <span className="w-2 h-2 rounded-full bg-purple-500"></span> Feminino
+                                    </span>
+                                    <span className="flex items-center gap-1.5 text-slate-300">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Ambos
+                                    </span>
+                                </div>
+
+                                <div>
+                                    © {new Date().getFullYear()} Lumina Studio. Projeto fictício para fins de portfólio.
+                                </div>
+
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* ================= FLOATING WHATSAPP BUTTON ================= */}
+                    <a
+                        href="https://wa.me/5511999999999?text=Ol%C3%A1!%20Gostaria%20de%20tirar%20uma%20d%C3%BAvida%20sobre%20os%20cortes%20da%20LUMINA."
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Fale conosco no WhatsApp"
+                        className="fixed bottom-6 right-6 z-40 p-4 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-2xl hover:scale-110 active:scale-95 transition duration-300 group flex items-center justify-center border border-white/20"
+                    >
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-brand-black animate-ping" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full border-2 border-brand-black" />
+                        <IconWhatsapp className="w-6 h-6" />
+                    </a>
+
+                    {/* ================= BOOKING MODAL ================= */}
+                    {/* [A11Y] Modal com role="dialog", aria-modal, aria-labelledby e foco inicial */}
+                    {bookingModalOpen && (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="booking-title"
+                            onKeyDown={(e) => {
+                                // [A11Y] Fecha com Esc
+                                if (e.key === 'Escape') {
+                                    setBookingModalOpen(false);
+                                    setBookingSuccess(false);
+                                    setIsSubmittingBooking(false);
+                                }
+                            }}
+                        >
+                            <div
+                                className="relative w-full max-w-lg glass-panel bg-brand-dark/95 rounded-3xl border border-white/20 shadow-2xl p-6 sm:p-8 overflow-hidden"
+                                ref={(el) => { if (el && !el.dataset.focused) { el.dataset.focused = '1'; el.focus(); } }}
+                                tabIndex={-1}
+                            >
+
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => {
+                                        setBookingModalOpen(false);
+                                        setBookingSuccess(false);
+                                        setIsSubmittingBooking(false);
+                                    }}
+                                    aria-label="Fechar modal de agendamento"
+                                    className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+                                >
+                                    <IconClose className="w-5 h-5" />
+                                </button>
+
+                                {bookingSuccess ? (
+                                    <div className="py-8 text-center space-y-4">
+                                        <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto">
+                                            <IconCheck className="w-8 h-8" />
+                                        </div>
+                                        <h3 className="font-display text-2xl font-bold text-white">Quase Pronto!</h3>
+                                        <p className="text-slate-300 text-sm max-w-xs mx-auto leading-relaxed">
+                                            Abrimos o WhatsApp em nova aba para você confirmar seu horário com a LUMINA Hair Studio. Se não abriu, verifique o bloqueador de pop-ups.
+                                        </p>
+                                        <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mt-4" />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <div className="mb-6">
+                                            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400">Agendamento Ágil</span>
+                                            <h3 id="booking-title" className="font-display text-2xl font-bold text-white">Reserve seu Horário</h3>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                Selecione a categoria desejada e deixe os detalhes com nossos especialistas.
+                                            </p>
+                                            {formData.artist && (
+                                                <p className="text-[11px] mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 font-semibold">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                                    Especialista: {formData.artist}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <form onSubmit={handleFormSubmit} className="space-y-4">
+
+                                            {/* Category Selection */}
+                                            <div>
+                                                <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">
+                                                    Categoria de Corte
+                                                </label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {CATEGORIES.map(cat => (
+                                                        <button
+                                                            type="button"
+                                                            key={cat.id}
+                                                            onClick={() => {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    category: cat.id,
+                                                                    serviceId: cat.services[0].id
+                                                                }));
+                                                                setSelectedService(cat.services[0]);
+                                                            }}
+                                                            className={`p-2 rounded-xl text-xs font-bold border transition ${formData.category === cat.id
+                                                                ? `${cat.colors.badgeBg} font-extrabold`
+                                                                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                                                                }`}
+                                                        >
+                                                            {cat.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Service Pick within Category */}
+                                            <div>
+                                                <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">
+                                                    Corte / Serviço Desejado
+                                                </label>
+                                                <select
+                                                    value={formData.serviceId}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const currentCat = CATEGORIES.find(c => c.id === formData.category);
+                                                        const foundS = currentCat?.services.find(s => s.id === val);
+                                                        setFormData(prev => ({ ...prev, serviceId: val }));
+                                                        if (foundS) setSelectedService(foundS);
+                                                    }}
+                                                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/20 text-white text-xs focus:outline-none focus:border-amber-400"
+                                                >
+                                                    {CATEGORIES.find(c => c.id === formData.category)?.services.map(s => (
+                                                        <option key={s.id} value={s.id}>
+                                                            {s.title} ({s.price} - {s.duration})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Personal Info */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">Seu Nome</label>
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        placeholder="Como te chamamos?"
+                                                        value={formData.name}
+                                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">Telefone (WhatsApp)</label>
+                                                    <input
+                                                        type="tel"
+                                                        required
+                                                        placeholder="(11) 99999-9999"
+                                                        value={formData.phone}
+                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                        className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Date & Time */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">Data Preferida</label>
+                                                    <input
+                                                        type="date"
+                                                        required
+                                                        value={formData.date}
+                                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[11px] font-semibold uppercase text-slate-300 mb-1">Horário Sugerido</label>
+                                                    <select
+                                                        value={formData.time}
+                                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-amber-400"
+                                                    >
+                                                        <option value="09:00">09:00</option>
+                                                        <option value="11:00">11:00</option>
+                                                        <option value="14:00">14:00</option>
+                                                        <option value="16:30">16:30</option>
+                                                        <option value="18:30">18:30</option>
+                                                        <option value="19:30">19:30</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-3">
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSubmittingBooking}
+                                                    className="w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 hover:opacity-95 text-neutral-950 shadow-xl shadow-amber-500/20 active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+                                                    <IconCalendar className="w-4 h-4" />
+                                                    {isSubmittingBooking ? 'Abrindo WhatsApp...' : 'Finalizar Reserva pelo WhatsApp'}
+                                                </button>
+                                            </div>
+
+                                            <p className="text-[10px] text-center text-slate-400 mt-2">
+                                                * Sem cobrança antecipada. O pagamento é realizado no estúdio após sua total satisfação.
+                                            </p>
+                                        </form>
+                                    </div>
+                                )}
+
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        }
+
+        // Render the App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
